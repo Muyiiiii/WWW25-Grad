@@ -50,9 +50,9 @@ This code requires the following:
 - if error in pip
 
 
-      - ```
-        apt-get update
-        ```
+    - ```
+      apt-get update
+      ```
         
 
     - ```
