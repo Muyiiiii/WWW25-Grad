@@ -41,11 +41,11 @@ This code requires the following:
     ```
 
 
-    - or
+  - or
       
-    - ```
-      pip install mpi4py
-      ```
+  - ```
+    pip install mpi4py
+    ```
 
 - if error in pip
 
