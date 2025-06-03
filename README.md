@@ -166,6 +166,7 @@ class argVar:
    ```
    python generation_main.py
    ```
+
 2. **Sample with guidance**
 
    ```python
@@ -174,7 +175,10 @@ class argVar:
    ```
    python generation_main.py
    ```
+
 3. **Detection**
+
+   Several generation results of amazon and yelp can be find in https://huggingface.co/Muyiiiii-HF/WWW25-Grad/tree/main
 
    ```
    python detect_main.py
