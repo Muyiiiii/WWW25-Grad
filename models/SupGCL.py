@@ -171,11 +171,6 @@ class SupGCL():
         # 对于Cora数据集，还可以获取标签以用于颜色编码
         labels = tmp_data.y.cpu().numpy()
 
-        if self.global_args.dataset=='tencent_big':
-            visual_idx=torch.logical_or(torch.logical_or(self.data.train_mask, self.data.val_mask), self.data.test_mask).cpu()
-            z_reduced=z_reduced[visual_idx]
-            labels=labels[visual_idx]
-
         # 创建一个散点图，每种类别用不同颜色表示
         plt.figure(figsize=(10, 8))
         scatter = plt.scatter(z_reduced[:, 0], z_reduced[:, 1], c=labels, cmap='viridis', alpha=0.6)
