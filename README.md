@@ -1,5 +1,7 @@
 # Grad: Guided Relation Diffusion Generation for Graph Augmentation in Graph Fraud Detection
 
+[Grad: Guided Relation Diffusion Generation for Graph Augmentation in Graph Fraud Detection | Proceedings of the ACM on Web Conference 2025](https://dl.acm.org/doi/abs/10.1145/3696410.3714520)
+
 ## Requirements
 
 This code requires the following:
