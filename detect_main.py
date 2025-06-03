@@ -23,43 +23,16 @@ import argparse
 import os
 
 from utils.dataProcess import loadDataset, mergeGraphDataList, GDCAugment, data4WFusionTrain
-from utils.MyUtils import color_print, argVar
+from utils.MyUtils import color_print
+from utils.args import argVar
 
 from models.WeightedFusion import WeightFusion, WFusionTrain
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description='BWGNN')
-    parser.add_argument("--dataset", type=str, default="yelp",
-                        help="Dataset for this model (yelp/amazon/tfinance/tsocial)")
-    parser.add_argument("--train_ratio", type=float, default=0.4, help="Training ratio")
-    parser.add_argument("--hid_dim", type=int, default=64, help="Hidden layer dimension")
-    parser.add_argument("--order", type=int, default=2, help="Order C in Beta Wavelet")
-    parser.add_argument("--homo", type=int, default=0, help="1 for BWGNN(Homo) and 0 for BWGNN(Hetero)")
-    parser.add_argument("--epoch", type=int, default=250, help="The max number of epochs")
-    parser.add_argument("--run", type=int, default=1, help="Running times")
-    parser.add_argument("--dataset", type=str, default="yelp", help="Dataset name")
-    parser.add_argument("--train_ratio", type=float, default=0.4, help="Training ratio")
-    parser.add_argument("--nodes_per_subgraph", type=int, default=32, help="Number of nodes per subgraph")
-    parser.add_argument("--device", type=str, default="cuda:0" if torch.cuda.is_available() else "cpu", help="Device to use for computation")
-    parser.add_argument("--SSupGCL_train_flag", type=bool, default=True, help="Flag for SSupGCL training")
-    parser.add_argument("--SSupGCL_num_train_part", type=int, default=20, help="Number of training partitions for SSupGCL")
-    parser.add_argument("--SSupGCL_batch_size", type=int, default=5, help="Batch size for SSupGCL training")
-    parser.add_argument("--SSupGCL_epochs", type=int, default=100, help="Number of epochs for SSupGCL training")
-    parser.add_argument("--SSupGCL_visualize_flag", type=bool, default=True, help="Flag for visualizing SSupGCL results")
-    parser.add_argument("--GuiDDPM_train_flag", type=bool, default=True, help="Flag for GuiDDPM training")
-    parser.add_argument("--GuiDDPM_train_steps", type=int, default=3000, help="Number of training steps for GuiDDPM")
-    parser.add_argument("--GuiDDPM_train_diffusion_steps", type=int, default=1000, help="Number of diffusion steps during GuiDDPM training")
-    parser.add_argument("--GuiDDPM_sample_diffusion_steps", type=int, default=1000, help="Number of diffusion steps during GuiDDPM sampling")
-
-    args = parser.parse_args()
-    
-    return args
-
 def main():
     final_ap=[]
     final_auc=[]
-    for i in tqdm([1]):
+    for i in tqdm((1,)):
         args = argVar()
         # print(args)
         # prepare data
@@ -77,8 +50,6 @@ def main():
         syn_relation_dict=torch.load(syn_relation_filename)
 
         graph_syn=mergeGraphDataList(args=args, graph_pyg=graph_pyg, syn_relation_dict=syn_relation_dict)
-
-        print(graph_syn)
 
         color_print(f'!!!!! Strat gdc augment')
         graph_gdc_list=[]
@@ -121,10 +92,8 @@ def main():
         final_ap.append(ap)
         final_auc.append(auc)
 
-    # color_print(f'auc:{final_auc}')
-    # color_print(f'ap:{final_ap}')
-
-
+    color_print(f'auc:{final_auc}')
+    color_print(f'ap:{final_ap}')
 
 
 

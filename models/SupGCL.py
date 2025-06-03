@@ -35,7 +35,7 @@ class HighPassFilterLayer(MessagePassing):
         # Subtract the mean neighbor feature from the node feature to act as a high pass filter
         return x - out / deg.view(-1, 1)
 
-class SSupGCL_GConv(torch.nn.Module):
+class SupGCL_GConv(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim, activation, num_layers):
         super().__init__()
         self.activation = activation()  # 激活函数实例化将在外部完成，这里直接使用
@@ -66,7 +66,7 @@ class SSupGCL_GConv(torch.nn.Module):
         
         return z
 
-class SSupGCL_Encoder(torch.nn.Module):
+class SupGCL_Encoder(torch.nn.Module):
     def __init__(self, encoder, augmentor, hidden_dim, proj_dim):
         super().__init__()
         self.encoder = encoder
@@ -87,7 +87,7 @@ class SSupGCL_Encoder(torch.nn.Module):
         z = F.elu(self.fc1(z))
         return self.fc2(z)
 
-class SSupGCL():
+class SupGCL():
     def __init__(self, global_args, graph_pyg_selected, nodes_per_subgraph, device, num_train_part=20, batch_size=5):
         self.nodes_per_subgraph=nodes_per_subgraph
         self.device=device
@@ -96,22 +96,22 @@ class SSupGCL():
         self.batch_size=batch_size
         self.global_args=global_args
 
-        color_print(f'!!!!! Start clustering for batch in SSupGCL')
+        color_print(f'!!!!! Start clustering for batch in SupGCL')
         self.cluster_data=ClusterData(self.data, num_parts=self.num_train_part, recursive=False)
         self.subgraph_cluster_loader = ClusterLoader(self.cluster_data, batch_size=self.batch_size, shuffle=True, num_workers=12)
-        color_print(f'!!!!! Finish clustering for batch in SSupGCL')
+        color_print(f'!!!!! Finish clustering for batch in SupGCL')
 
         self.aug1 = A.Compose([A.FeatureDropout(pf=0.3), A.FeatureMasking(pf=0.3)])
         self.aug2 = A.Compose([A.FeatureDropout(pf=0.3), A.FeatureMasking(pf=0.3)])
         # aug2 = A.Compose([A.FeatureDropout(pf=0.1), A.Identity()])
 
-        self.gconv = SSupGCL_GConv(input_dim=self.data.x.shape[1], hidden_dim=self.nodes_per_subgraph, activation=torch.nn.ReLU, num_layers=3).to(self.device)
-        self.encoder_model = SSupGCL_Encoder(encoder=self.gconv, augmentor=(self.aug1, self.aug2), hidden_dim=self.nodes_per_subgraph, proj_dim=128).to(self.device)
+        self.gconv = SupGCL_GConv(input_dim=self.data.x.shape[1], hidden_dim=self.nodes_per_subgraph, activation=torch.nn.ReLU, num_layers=3).to(self.device)
+        self.encoder_model = SupGCL_Encoder(encoder=self.gconv, augmentor=(self.aug1, self.aug2), hidden_dim=self.nodes_per_subgraph, proj_dim=128).to(self.device)
         self.contrast_model = DualBranchContrast(loss=L.InfoNCE(tau=0.2), mode='L2L', intraview_negs=True).to(self.device)
 
         self.optimizer = Adam(self.encoder_model.parameters(), lr=0.001)
 
-    def SSupGCL_train(self, batch_data):
+    def SupGCL_train(self, batch_data):
         self.encoder_model.train()
         self.optimizer.zero_grad()
         z, z1, z2 = self.encoder_model(batch_data.x, batch_data.edge_index, batch_data.edge_attr)
@@ -138,7 +138,7 @@ class SSupGCL():
         return loss.item()
     
     def train(self, epochs=50):
-        color_print(f'!!!!! SSupGCL start training')
+        color_print(f'!!!!! SupGCL start training')
         time=range(1, epochs+1)
         with tqdm(time, desc='(T)') as pbar:
             for epoch in pbar:
@@ -147,13 +147,13 @@ class SSupGCL():
                     # 可以将节点索引和邻接表传递给您的模型
                     batch=batch.to(self.device)
                     # print(batch.x.shape)
-                    loss = self.SSupGCL_train(batch_data=batch)
+                    loss = self.SupGCL_train(batch_data=batch)
                     # 更新进度条和损失信息
                     pbar.set_postfix({'loss': '{:.6f}'.format(loss),'time': epoch})
                     # pbar.update()
                     batch=batch.to('cpu')
         
-        color_print(f'!!!!! SSupGCL finish training')
+        color_print(f'!!!!! SupGCL finish training')
 
     def visualize(self):
         tmp_data=self.data.to(self.device)
@@ -162,7 +162,7 @@ class SSupGCL():
         with torch.no_grad():
             z, _, _ = self.encoder_model(tmp_data.x, tmp_data.edge_index, tmp_data.edge_attr)
         
-        color_print(f'!!!!! SSupGCL start visualizing')
+        color_print(f'!!!!! SupGCL start visualizing')
 
         # 运行t-SNE算法，降维到2D
         tsne = TSNE(n_components=2, random_state=42)
@@ -170,6 +170,11 @@ class SSupGCL():
 
         # 对于Cora数据集，还可以获取标签以用于颜色编码
         labels = tmp_data.y.cpu().numpy()
+
+        if self.global_args.dataset=='tencent_big':
+            visual_idx=torch.logical_or(torch.logical_or(self.data.train_mask, self.data.val_mask), self.data.test_mask).cpu()
+            z_reduced=z_reduced[visual_idx]
+            labels=labels[visual_idx]
 
         # 创建一个散点图，每种类别用不同颜色表示
         plt.figure(figsize=(10, 8))
@@ -180,8 +185,8 @@ class SSupGCL():
         plt.ylabel('t-SNE 2')
         plt.show()
 
-        pic_name=f'./tmp/{self.global_args.dataset}_{self.global_args.SSupGCL_epochs}epochs_SSupGCLVisualization'
-        info='SSupGCL visualization'
+        pic_name=f'./tmp/{self.global_args.dataset}_{self.global_args.SupGCL_epochs}epochs_SupGCLVisualization'
+        info='SupGCL visualization'
         save_pic_iterly(pic_name=pic_name, postfix='png', info=info)
 
     def project(self, graph_pyg):
@@ -201,7 +206,7 @@ class SSupGCL():
             'contrast_model_state_dict': self.contrast_model.state_dict(),
         }, path)
 
-        color_print(f'!!!!! SSupGCL saving parameter in {path} Success')
+        color_print(f'!!!!! SupGCL saving parameter in {path} Success')
 
     def load_model(self, path):
         checkpoint = torch.load(path, map_location=self.device)
@@ -209,6 +214,6 @@ class SSupGCL():
         self.encoder_model.load_state_dict(checkpoint['encoder_model_state_dict'])
         self.contrast_model.load_state_dict(checkpoint['contrast_model_state_dict'])
 
-        color_print(f'!!!!! SSupGCL loading parameter from {path} Success')
+        color_print(f'!!!!! SupGCL loading parameter from {path} Success')
 
         

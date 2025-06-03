@@ -1,3 +1,27 @@
+# import numpy as np
+# import torch
+# import matplotlib.pyplot as plt
+# from scipy.io import loadmat
+# import torch_geometric
+# from torch_geometric.utils import to_dense_adj, dense_to_sparse, add_self_loops, degree
+# from torch_geometric.nn import MessagePassing
+# from torch_geometric.transforms import NormalizeFeatures
+# from tqdm import tqdm
+# from scipy.io import loadmat
+# from torch_geometric.data import ClusterData, ClusterLoader
+# from sklearn.model_selection import train_test_split
+# import torch.nn as nn
+# import torch.nn.functional as F
+# from torch_geometric.nn import GCNConv,SAGEConv,GATConv
+# import os
+# import pickle
+# from sklearn.metrics import roc_auc_score
+# from torchmetrics import AUROC
+
+# from improved_diffusion import dist_util
+# import datetime
+# import torch.distributed as dist
+
 from .MyUtils import color_print, pyg_data_to_dgl_graph
 
 import torch
@@ -133,7 +157,7 @@ def loadDataset(dataset, train_ratio):
         graph_dgl.ndata['test_mask']=test_mask
 
     elif dataset=='blogcatalog':
-        bc_path = f'../bc.pt'
+        bc_path = f'../../../data/blogcatalog/bc.pt'
         graph_pyg = torch.load(bc_path)[0]
         graph_pyg.edge_index = graph_pyg.edge_indexes[0]
         graph_dgl = pyg_data_to_dgl_graph(graph_pyg)
@@ -145,6 +169,35 @@ def loadDataset(dataset, train_ratio):
         graph_pyg.train_mask=train_mask
         graph_pyg.val_mask=val_mask
         graph_pyg.test_mask=test_mask
+        graph_dgl.ndata['train_mask']=train_mask
+        graph_dgl.ndata['val_mask']=val_mask
+        graph_dgl.ndata['test_mask']=test_mask
+
+    elif dataset=='tencent_small':
+        tencent_path = f'../../../../../data/tencent/graph_pyg_small_v1.pth'
+        # tencent_path = f'/apdcephfs/jp_qy3_cephfs/ariyang/gad/2024/data/tencent/graph_pyg_small_v1.pth'
+        graph_pyg = torch.load(tencent_path)
+        graph_dgl = pyg_data_to_dgl_graph(graph_pyg)
+
+        train_mask=graph_pyg.train_mask
+        val_mask=graph_pyg.val_mask
+        test_mask=graph_pyg.test_mask
+
+        graph_dgl.ndata['train_mask']=train_mask
+        graph_dgl.ndata['val_mask']=val_mask
+        graph_dgl.ndata['test_mask']=test_mask
+
+    elif dataset=='tencent_big':
+        tencent_path = f'../../../../../data/tencent/graph_pyg_big_v1.pth'
+        # tencent_path = f'/apdcephfs/jp_qy3_cephfs/ariyang/gad/2024/data/tencent/graph_pyg_big_v1.pth'
+        
+        graph_pyg = torch.load(tencent_path)
+        graph_dgl = pyg_data_to_dgl_graph(graph_pyg)
+
+        train_mask=graph_pyg.train_mask
+        val_mask=graph_pyg.val_mask
+        test_mask=graph_pyg.test_mask
+
         graph_dgl.ndata['train_mask']=train_mask
         graph_dgl.ndata['val_mask']=val_mask
         graph_dgl.ndata['test_mask']=test_mask
