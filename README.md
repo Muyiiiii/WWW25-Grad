@@ -2,6 +2,8 @@
 
 [Grad: Guided Relation Diffusion Generation for Graph Augmentation in Graph Fraud Detection | Proceedings of the ACM on Web Conference 2025](https://dl.acm.org/doi/abs/10.1145/3696410.3714520)
 
+Several generation results of amazon and yelp can be find in https://huggingface.co/Muyiiiii-HF/WWW25-Grad/tree/main .
+
 ## Requirements
 
 This code requires the following:
@@ -180,7 +182,7 @@ class argVar:
 
 3. **Detection**
 
-   Several generation results of amazon and yelp can be find in https://huggingface.co/Muyiiiii-HF/WWW25-Grad/tree/main
+   Several generation results of amazon and yelp can be find in https://huggingface.co/Muyiiiii-HF/WWW25-Grad/tree/main .
 
    ```
    python detect_main.py
