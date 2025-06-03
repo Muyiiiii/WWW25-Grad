@@ -4,6 +4,8 @@
 
 Several generation results of amazon and yelp can be find in https://huggingface.co/Muyiiiii-HF/WWW25-Grad/tree/main .
 
+Code is available in [AI4Risk/antifraud: A repository for financial fraud detection (github.com)](https://github.com/AI4Risk/antifraud)
+
 ## Requirements
 
 This code requires the following:
